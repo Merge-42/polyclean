@@ -1,0 +1,43 @@
+[project]
+name = "polyclean-workspace"
+version = "0.1.0"
+description = "PolyClean example workspace (uv + python-polylith loose theme)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "pydantic>=2.6",
+  "aiosqlite>=0.19",
+  "httpx>=0.27",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+dev-mode-dirs = ["components", "bases", "development", "."]
+
+[tool.polylith]
+namespace = "polyclean"
+
+[tool.polylith.structure]
+theme = "loose"
+
+[tool.polylith.bricks]
+"bases/polyclean/publishing_api" = "polyclean/publishing_api"
+"components/polyclean/posts_contract" = "polyclean/posts_contract"
+"components/polyclean/instagram_adapter" = "polyclean/instagram_adapter"
+"components/polyclean/create_post_flow" = "polyclean/create_post_flow"
+"components/polyclean/instagram_contract" = "polyclean/instagram_contract"
+"components/polyclean/publish_post_flow" = "polyclean/publish_post_flow"
+"components/polyclean/sqlite_adapter" = "polyclean/sqlite_adapter"
+[dependency-groups]
+dev = [
+  "polylith-cli>=1.0.0",
+  "pytest>=8.0.0",
+  "ruff>=0.5.0",
+  "mypy>=1.10.0",
+  "import-linter>=2.0.0",
+]

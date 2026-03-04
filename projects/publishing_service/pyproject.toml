@@ -1,0 +1,31 @@
+[project]
+name = "publishing_service"
+version = "0.1.0"
+description = "Project packaging example for the publishing_api base"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "pydantic",
+  "aiosqlite",
+  "httpx",
+]
+
+[build-system]
+requires = ["hatchling", "hatch-polylith-bricks"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.hooks.polylith-bricks]
+# required to enable the hook (can be empty)
+
+[tool.hatch.build.targets.wheel]
+packages = ["polyclean"]
+
+[tool.polylith.bricks]
+"../../bases/polyclean/publishing_api" = "polyclean/publishing_api"
+"../../components/polyclean/posts_contract" = "polyclean/posts_contract"
+"../../components/polyclean/instagram_contract" = "polyclean/instagram_contract"
+"../../components/polyclean/create_post_flow" = "polyclean/create_post_flow"
+"../../components/polyclean/publish_post_flow" = "polyclean/publish_post_flow"
+"../../components/polyclean/sqlite_adapter" = "polyclean/sqlite_adapter"
+"../../components/polyclean/instagram_adapter" = "polyclean/instagram_adapter"
