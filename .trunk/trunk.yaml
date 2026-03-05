@@ -11,21 +11,24 @@ runtimes:
     - python@3.10.8
 # This is the section where you manage your linters. (https://docs.trunk.io/check/configuration)
 lint:
+  disabled:
+    - mypy
   enabled:
+    - actionlint@1.7.8
     - ty@0.0.20
     - bandit@1.9.4
     - black@26.1.0
-    - checkov@3.2.506
+    - checkov@3.2.507
     - git-diff-check
     - isort@8.0.1
     - markdownlint@0.48.0
     - prettier@3.8.1
-    - ruff@0.15.4
+    - ruff@0.15.5
     - shellcheck@0.11.0
     - shfmt@3.6.0
     - taplo@0.10.0
     - trivy@0.69.3
-    - trufflehog@3.93.6
+    - trufflehog@3.93.7
     - yamllint@1.38.0
   ignore:
     - linters: [bandit]
