@@ -6,12 +6,18 @@ the layers it is allowed to depend on (from PolyClean.md):
     Layer         May import from
     ------------  ----------------------------------
     contract      contract, contract_lib
-    contract_lib  contract, contract_lib
+    contract_lib  (nothing from polyclean — pure utilities)
     flow          contract, contract_lib, flow_lib
-    flow_lib      contract, contract_lib, flow_lib
+    flow_lib      (nothing from polyclean — pure utilities)
     adapter       contract, contract_lib, adapter_lib
-    adapter_lib   contract, contract_lib, adapter_lib
+    adapter_lib   (nothing from polyclean — pure utilities)
     base          (everything — no restriction)
+
+_lib bricks are layer-agnostic utilities. They should not depend on layer
+types because they exist precisely for code that is "too implementation-
+specific" for the layer proper. If a lib needs layer types, that code likely
+belongs in the layer itself. Same-layer lib dependencies are allowed;
+Python's import cycle detection catches any problematic cycles.
 """
 
 from pathlib import Path
@@ -47,14 +53,14 @@ def test_contracts_may_only_import_contract_layer(graph, bricks):
     )
 
 
-def test_contract_libs_may_only_import_contract_layer(graph, bricks):
-    """contract_libs support the contract layer and share the same boundary."""
+def test_contract_libs_may_only_import_their_own_layer(graph, bricks):
+    """contract_libs are pure utilities — they should not depend on contracts or any layer type."""
     assert_only_imports_from(
         graph,
         sources=bricks.contract_lib,
-        allowed=bricks.contract | bricks.contract_lib,
+        allowed=bricks.contract_lib,
         all_bricks=bricks.all,
-        rule="contract_lib -> contract | contract_lib",
+        rule="contract_lib -> contract_lib only",
     )
 
 
@@ -69,14 +75,14 @@ def test_flows_may_only_import_contract_and_flow_layer(graph, bricks):
     )
 
 
-def test_flow_libs_may_only_import_contract_and_flow_layer(graph, bricks):
-    """flow_libs support the flow layer and share the same boundary."""
+def test_flow_libs_may_only_import_their_own_layer(graph, bricks):
+    """flow_libs are pure utilities — they should not depend on flows or any layer type."""
     assert_only_imports_from(
         graph,
         sources=bricks.flow_lib,
-        allowed=bricks.contract | bricks.contract_lib | bricks.flow_lib,
+        allowed=bricks.flow_lib,
         all_bricks=bricks.all,
-        rule="flow_lib -> contract | contract_lib | flow_lib",
+        rule="flow_lib -> flow_lib only",
     )
 
 
@@ -91,14 +97,14 @@ def test_adapters_may_only_import_contract_and_adapter_layer(graph, bricks):
     )
 
 
-def test_adapter_libs_may_only_import_contract_and_adapter_layer(graph, bricks):
-    """adapter_libs support the adapter layer and share the same boundary."""
+def test_adapter_libs_may_only_import_their_own_layer(graph, bricks):
+    """adapter_libs are pure utilities — they should not depend on adapters or any layer type."""
     assert_only_imports_from(
         graph,
         sources=bricks.adapter_lib,
-        allowed=bricks.contract | bricks.contract_lib | bricks.adapter_lib,
+        allowed=bricks.adapter_lib,
         all_bricks=bricks.all,
-        rule="adapter_lib -> contract | contract_lib | adapter_lib",
+        rule="adapter_lib -> adapter_lib only",
     )
 
 

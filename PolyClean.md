@@ -502,7 +502,9 @@ Examples:
 
 ### Import Rules
 
-A layer library may only be imported by bricks in the same layer.
+#### What layers can import FROM libs
+
+A layer library may only be imported by bricks in the same layer (or by base, the composition root).
 
 | Layer    | May Import       | May NOT Import                |
 | -------- | ---------------- | ----------------------------- |
@@ -510,6 +512,20 @@ A layer library may only be imported by bricks in the same layer.
 | Flow     | `*_flow_lib`     | `*_adapter_lib`               |
 | Adapter  | `*_adapter_lib`  | `*_flow_lib`                  |
 | Base     | all `_lib` types | nothing                       |
+
+#### What libs can import
+
+A layer library should be a **pure, layer-agnostic utility**. It exists precisely for code that is "too implementation-specific" to belong in the layer proper. Therefore, libs should NOT depend on layer types:
+
+| Brick type       | May import from                           |
+| ---------------- | ----------------------------------------- |
+| `*_contract_lib` | (nothing from polyclean — pure utilities) |
+| `*_flow_lib`     | (nothing from polyclean — pure utilities) |
+| `*_adapter_lib`  | (nothing from polyclean — pure utilities) |
+
+If a lib needs to depend on layer types, that code likely belongs in the layer itself, not in the lib.
+
+Same-layer lib dependencies are allowed (e.g., `lib_a` can import `lib_b` if both are `*_adapter_lib`). Python's import cycle detection catches any problematic cycles at runtime.
 
 ### Example: Adapter Library
 
