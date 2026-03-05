@@ -24,6 +24,8 @@ import pytest
 # Brick discovery
 # ---------------------------------------------------------------------------
 
+_WORKSPACE_ROOT = Path(__file__).parent.parent.parent
+
 # Longer suffixes listed first so '_contract_lib' matches before '_contract', etc.
 _SUFFIX_TO_LAYER: list[tuple[str, str]] = [
     ("_contract_lib", "contract_lib"),
@@ -35,28 +37,49 @@ _SUFFIX_TO_LAYER: list[tuple[str, str]] = [
 ]
 
 
-def _layer_of(brick_name: str) -> str:
-    """Return the layer for a brick given its short name (e.g. 'create_post_flow')."""
-    return next(
-        (layer for suffix, layer in _SUFFIX_TO_LAYER if brick_name.endswith(suffix)),
-        "base",
+def _layer_of_component(name: str) -> str:
+    """Return the layer for a component brick, or raise if the suffix is unrecognised.
+
+    Raises rather than defaulting to 'base' so that a misplaced or misspelled
+    component is caught immediately rather than silently skipping enforcement.
+    """
+    layer = next(
+        (layer for suffix, layer in _SUFFIX_TO_LAYER if name.endswith(suffix)),
+        None,
     )
+    if layer is None:
+        raise ValueError(
+            f"Component '{name}' has an unrecognised suffix. "
+            f"Expected one of: {[s for s, _ in _SUFFIX_TO_LAYER]}. "
+            f"Base bricks must live under bases/polyclean/, not components/polyclean/."
+        )
+    return layer
 
 
-def _classify_bricks(graph: grimp.ImportGraph) -> SimpleNamespace:
-    """Return a namespace of sets, one per layer, containing fully-qualified brick names."""
+def _classify_bricks() -> SimpleNamespace:
+    """Return a namespace of sets, one per layer, containing fully-qualified brick names.
+
+    Base bricks are discovered from bases/polyclean/ (folder layout is the source of truth).
+    Component bricks are classified by suffix from components/polyclean/.
+    An unrecognised component suffix raises immediately.
+    """
     layers: dict[str, set[str]] = {layer: set() for _, layer in _SUFFIX_TO_LAYER}
     layers["base"] = set()
 
-    bricks = {
-        f"polyclean.{m.split('.')[1]}"
-        for m in graph.modules
-        if m.startswith("polyclean.") and "." in m
-    }
-    for brick in bricks:
-        layers[_layer_of(brick.split(".")[1])].add(brick)
+    base_dirs = (_WORKSPACE_ROOT / "bases" / "polyclean").iterdir()
+    component_dirs = (_WORKSPACE_ROOT / "components" / "polyclean").iterdir()
 
-    return SimpleNamespace(**layers)
+    for path in base_dirs:
+        if path.is_dir():
+            layers["base"].add(f"polyclean.{path.name}")
+
+    for path in component_dirs:
+        if path.is_dir():
+            layers[_layer_of_component(path.name)].add(f"polyclean.{path.name}")
+
+    ns = SimpleNamespace(**layers)
+    ns.all = set().union(*layers.values())
+    return ns
 
 
 # ---------------------------------------------------------------------------
@@ -73,8 +96,8 @@ def graph() -> grimp.ImportGraph:
 
 
 @pytest.fixture(scope="session")
-def bricks(graph) -> SimpleNamespace:
-    return _classify_bricks(graph)
+def bricks() -> SimpleNamespace:
+    return _classify_bricks()
 
 
 # ---------------------------------------------------------------------------
@@ -86,14 +109,10 @@ def assert_only_imports_from(
     graph: grimp.ImportGraph,
     sources: set[str],
     allowed: set[str],
+    all_bricks: set[str],
     rule: str,
 ) -> None:
     """Fail if any brick in *sources* imports a polyclean brick outside *allowed*."""
-    all_bricks = {
-        f"polyclean.{m.split('.')[1]}"
-        for m in graph.modules
-        if m.startswith("polyclean.") and "." in m
-    }
     forbidden = all_bricks - allowed - sources
 
     violations = [
@@ -116,6 +135,7 @@ def test_contracts_may_only_import_contract_layer(graph, bricks):
         graph,
         sources=bricks.contract,
         allowed=bricks.contract | bricks.contract_lib,
+        all_bricks=bricks.all,
         rule="contract -> contract | contract_lib",
     )
 
@@ -126,6 +146,7 @@ def test_contract_libs_may_only_import_contract_layer(graph, bricks):
         graph,
         sources=bricks.contract_lib,
         allowed=bricks.contract | bricks.contract_lib,
+        all_bricks=bricks.all,
         rule="contract_lib -> contract | contract_lib",
     )
 
@@ -136,6 +157,7 @@ def test_flows_may_only_import_contract_and_flow_layer(graph, bricks):
         graph,
         sources=bricks.flow,
         allowed=bricks.contract | bricks.contract_lib | bricks.flow_lib,
+        all_bricks=bricks.all,
         rule="flow -> contract | contract_lib | flow_lib",
     )
 
@@ -146,6 +168,7 @@ def test_flow_libs_may_only_import_contract_and_flow_layer(graph, bricks):
         graph,
         sources=bricks.flow_lib,
         allowed=bricks.contract | bricks.contract_lib | bricks.flow_lib,
+        all_bricks=bricks.all,
         rule="flow_lib -> contract | contract_lib | flow_lib",
     )
 
@@ -156,6 +179,7 @@ def test_adapters_may_only_import_contract_and_adapter_layer(graph, bricks):
         graph,
         sources=bricks.adapter,
         allowed=bricks.contract | bricks.contract_lib | bricks.adapter_lib,
+        all_bricks=bricks.all,
         rule="adapter -> contract | contract_lib | adapter_lib",
     )
 
@@ -166,6 +190,7 @@ def test_adapter_libs_may_only_import_contract_and_adapter_layer(graph, bricks):
         graph,
         sources=bricks.adapter_lib,
         allowed=bricks.contract | bricks.contract_lib | bricks.adapter_lib,
+        all_bricks=bricks.all,
         rule="adapter_lib -> contract | contract_lib | adapter_lib",
     )
 
@@ -176,18 +201,10 @@ def test_bases_may_import_anything(graph, bricks):
     This test is intentionally a no-op today. It exists to document the rule
     and to act as a placeholder if restrictions are added in the future.
     """
-    all_layers = (
-        bricks.contract
-        | bricks.contract_lib
-        | bricks.flow
-        | bricks.flow_lib
-        | bricks.adapter
-        | bricks.adapter_lib
-        | bricks.base
-    )
     assert_only_imports_from(
         graph,
         sources=bricks.base,
-        allowed=all_layers,
+        allowed=bricks.all,
+        all_bricks=bricks.all,
         rule="base -> (everything)",
     )
