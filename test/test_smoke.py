@@ -1,7 +1,6 @@
 import pytest
-
 from polyclean.create_post_flow import CreatePostFlow
-from polyclean.sqlite_adapter import SQLitePostAdapter
+from polyclean.sqlite_post_adapter import SQLitePostAdapter
 
 
 @pytest.mark.asyncio

@@ -2,14 +2,14 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-
-from polyclean.posts_contract import PostStoragePort
-from polyclean.instagram_contract import InstagramPort
+from fastapi.middleware.cors import CORSMiddleware
 from polyclean.create_post_flow import CreatePostFlow
+from polyclean.instagram_contract import InstagramPort
+from polyclean.instagram_publish_adapter import InstagramGraphAdapter
+from polyclean.posts_contract import PostStoragePort
 from polyclean.publish_post_flow import PublishPostFlow
-from polyclean.sqlite_adapter import SQLitePostAdapter
-from polyclean.instagram_adapter import InstagramGraphAdapter
+from polyclean.sqlite_post_adapter import SQLitePostAdapter
+from pydantic import BaseModel
 
 
 class CreatePostRequest(BaseModel):
@@ -31,9 +31,19 @@ def create_app(storage: PostStoragePort, instagram: InstagramPort) -> FastAPI:
 
     app = FastAPI(title="PolyClean Publishing API", lifespan=lifespan)
 
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     @app.post("/posts")
     async def create_post(req: CreatePostRequest):
-        result = await create_post_flow.flow(content=req.content, image_url=req.image_url)
+        result = await create_post_flow.flow(
+            content=req.content, image_url=req.image_url
+        )
         if not result["success"]:
             raise HTTPException(status_code=400, detail=result["message"])
         return result
@@ -48,6 +58,7 @@ def create_app(storage: PostStoragePort, instagram: InstagramPort) -> FastAPI:
     return app
 
 
+# Dependency injection setup
 db_path = os.getenv("DB_PATH", "posts.db")
 storage = SQLitePostAdapter(db_path=db_path)
 

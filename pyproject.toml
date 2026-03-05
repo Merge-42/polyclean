@@ -10,11 +10,17 @@ dependencies = [
   "pydantic>=2.6",
   "aiosqlite>=0.19",
   "httpx>=0.27",
+  "requests>=2.31",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+lint.select = ["E", "F", "ANN"]
 
 [tool.hatch.build]
 dev-mode-dirs = ["components", "bases", "development", "."]
@@ -28,16 +34,19 @@ theme = "loose"
 [tool.polylith.bricks]
 "bases/polyclean/publishing_api" = "polyclean/publishing_api"
 "components/polyclean/posts_contract" = "polyclean/posts_contract"
-"components/polyclean/instagram_adapter" = "polyclean/instagram_adapter"
+"components/polyclean/instagram_publish_adapter" = "polyclean/instagram_publish_adapter"
 "components/polyclean/create_post_flow" = "polyclean/create_post_flow"
 "components/polyclean/instagram_contract" = "polyclean/instagram_contract"
 "components/polyclean/publish_post_flow" = "polyclean/publish_post_flow"
-"components/polyclean/sqlite_adapter" = "polyclean/sqlite_adapter"
+"components/polyclean/sqlite_post_adapter" = "polyclean/sqlite_post_adapter"
+"components/polyclean/rest_adapter_lib" = "polyclean/rest_adapter_lib"
 [dependency-groups]
 dev = [
   "polylith-cli>=1.0.0",
-  "pytest>=8.0.0",
+  "pytest>=9.0.2",
+  "pytest-asyncio>=1.3.0",
   "ruff>=0.5.0",
   "mypy>=1.10.0",
-  "import-linter>=2.0.0",
+  "grimp>=3.0.0",
+  "types-requests>=2.31.0",
 ]

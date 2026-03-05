@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from polyclean.posts_contract import PostStoragePort
 from polyclean.instagram_contract import InstagramPort
+from polyclean.posts_contract import PostStoragePort
 
 
 class PublishPostFlow:
