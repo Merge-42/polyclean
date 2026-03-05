@@ -1,1 +1,1 @@
-Packaging example (optional).
+# Packaging example (optional)

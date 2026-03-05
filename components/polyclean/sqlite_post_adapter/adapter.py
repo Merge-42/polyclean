@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
 
 import aiosqlite
-
 from polyclean.posts_contract import Post, PostStoragePort
 
 
@@ -15,8 +14,7 @@ class SQLitePostAdapter(PostStoragePort):
 
     async def initialize(self) -> None:
         self._conn = await aiosqlite.connect(self._db_path)
-        await self._conn.execute(
-            """
+        await self._conn.execute("""
             CREATE TABLE IF NOT EXISTS posts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 content TEXT NOT NULL,
@@ -25,8 +23,7 @@ class SQLitePostAdapter(PostStoragePort):
                 instagram_post_id TEXT,
                 posted INTEGER NOT NULL DEFAULT 0
             )
-            """
-        )
+            """)
         await self._conn.commit()
 
     async def close(self) -> None:
@@ -36,14 +33,22 @@ class SQLitePostAdapter(PostStoragePort):
 
     def _require_conn(self) -> aiosqlite.Connection:
         if self._conn is None:
-            raise RuntimeError("SQLitePostAdapter not initialized. Call initialize() first.")
+            raise RuntimeError(
+                "SQLitePostAdapter not initialized. Call initialize() first."
+            )
         return self._conn
 
     async def save(self, post: Post) -> Post:
         conn = self._require_conn()
         cursor = await conn.execute(
             "INSERT INTO posts (content, image_url, created_at, instagram_post_id, posted) VALUES (?, ?, ?, ?, ?)",
-            (post.content, post.image_url, post.created_at.isoformat(), post.instagram_post_id, int(post.posted)),
+            (
+                post.content,
+                post.image_url,
+                post.created_at.isoformat(),
+                post.instagram_post_id,
+                int(post.posted),
+            ),
         )
         await conn.commit()
         post.id = cursor.lastrowid

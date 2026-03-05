@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from polyclean.posts_contract import Post, PostStoragePort
 
@@ -17,7 +17,7 @@ class CreatePostFlow:
             id=None,
             content=content,
             image_url=image_url,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
             instagram_post_id=None,
             posted=False,
         )

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Protocol, Optional, List
+from typing import List, Optional, Protocol
+
 from .entities import Post
 
 
