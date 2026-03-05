@@ -25,7 +25,7 @@ We can help AI systems produce more maintainable and modular code that humans ca
 
 ## Project Structure
 
-```
+```text
 polyclean/
 ├── components/          # Reusable building blocks
 │   └── polyclean/
