@@ -26,41 +26,36 @@ import pytest
 # ---------------------------------------------------------------------------
 
 
+_SUFFIX_TO_LAYER: list[tuple[str, str]] = [
+    ("_contract_lib", "contract_lib"),  # checked before _contract
+    ("_flow_lib", "flow_lib"),  # checked before _flow
+    ("_adapter_lib", "adapter_lib"),  # checked before _adapter
+    ("_contract", "contract"),
+    ("_flow", "flow"),
+    ("_adapter", "adapter"),
+]
+
+
+def _layer_of(brick_name: str) -> str:
+    """Return the layer for a brick given its short name (e.g. 'create_post_flow')."""
+    return next(
+        (layer for suffix, layer in _SUFFIX_TO_LAYER if brick_name.endswith(suffix)),
+        "base",
+    )
+
+
 def _top_level_bricks(graph: grimp.ImportGraph) -> dict[str, set[str]]:
     """Group polyclean bricks by layer based on their name suffix."""
-    layers: dict[str, set[str]] = {
-        "contract": set(),
-        "flow": set(),
-        "adapter": set(),
-        "contract_lib": set(),
-        "flow_lib": set(),
-        "adapter_lib": set(),
-        "base": set(),
+    layers: dict[str, set[str]] = {layer: set() for _, layer in _SUFFIX_TO_LAYER}
+    layers["base"] = set()
+
+    bricks = {
+        f"polyclean.{m.split('.')[1]}"
+        for m in graph.modules
+        if m.startswith("polyclean.") and "." in m
     }
-    seen: set[str] = set()
-    for module in graph.modules:
-        parts = module.split(".")
-        if len(parts) < 2 or parts[0] != "polyclean":  # noqa: PLR2004
-            continue
-        brick = f"polyclean.{parts[1]}"
-        if brick in seen or brick == "polyclean.polyclean":
-            continue
-        seen.add(brick)
-        name = parts[1]
-        if name.endswith("_contract_lib"):
-            layers["contract_lib"].add(brick)
-        elif name.endswith("_flow_lib"):
-            layers["flow_lib"].add(brick)
-        elif name.endswith("_adapter_lib"):
-            layers["adapter_lib"].add(brick)
-        elif name.endswith("_contract"):
-            layers["contract"].add(brick)
-        elif name.endswith("_flow"):
-            layers["flow"].add(brick)
-        elif name.endswith("_adapter"):
-            layers["adapter"].add(brick)
-        else:
-            layers["base"].add(brick)
+    for brick in bricks:
+        layers[_layer_of(brick.split(".")[1])].add(brick)
     return layers
 
 
