@@ -19,72 +19,8 @@ from types import SimpleNamespace
 
 import grimp
 import pytest
-
-# ---------------------------------------------------------------------------
-# Brick discovery
-# ---------------------------------------------------------------------------
-
-_WORKSPACE_ROOT = Path(__file__).parent.parent.parent
-
-# Longer suffixes listed first so '_contract_lib' matches before '_contract', etc.
-_SUFFIX_TO_LAYER: list[tuple[str, str]] = [
-    ("_contract_lib", "contract_lib"),
-    ("_flow_lib", "flow_lib"),
-    ("_adapter_lib", "adapter_lib"),
-    ("_contract", "contract"),
-    ("_flow", "flow"),
-    ("_adapter", "adapter"),
-]
-
-
-def _layer_of_component(name: str) -> str:
-    """Return the layer for a component brick, or raise if the suffix is unrecognised.
-
-    Raises rather than defaulting to 'base' so that a misplaced or misspelled
-    component is caught immediately rather than silently skipping enforcement.
-    """
-    layer = next(
-        (layer for suffix, layer in _SUFFIX_TO_LAYER if name.endswith(suffix)),
-        None,
-    )
-    if layer is None:
-        raise ValueError(
-            f"Component '{name}' has an unrecognised suffix. "
-            f"Expected one of: {[s for s, _ in _SUFFIX_TO_LAYER]}. "
-            f"Base bricks must live under bases/polyclean/, not components/polyclean/."
-        )
-    return layer
-
-
-def _classify_bricks() -> SimpleNamespace:
-    """Return a namespace of sets, one per layer, containing fully-qualified brick names.
-
-    Base bricks are discovered from bases/polyclean/ (folder layout is the source of truth).
-    Component bricks are classified by suffix from components/polyclean/.
-    An unrecognised component suffix raises immediately.
-    """
-    layers: dict[str, set[str]] = {layer: set() for _, layer in _SUFFIX_TO_LAYER}
-    layers["base"] = set()
-
-    base_dirs = (_WORKSPACE_ROOT / "bases" / "polyclean").iterdir()
-    component_dirs = (_WORKSPACE_ROOT / "components" / "polyclean").iterdir()
-
-    for path in base_dirs:
-        if path.is_dir():
-            layers["base"].add(f"polyclean.{path.name}")
-
-    for path in component_dirs:
-        if path.is_dir():
-            layers[_layer_of_component(path.name)].add(f"polyclean.{path.name}")
-
-    ns = SimpleNamespace(**layers)
-    ns.all = set().union(*layers.values())
-    return ns
-
-
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
+from grimp_assertions import assert_only_imports_from
+from polyclean_bricks import classify_bricks
 
 
 @pytest.fixture(scope="session")
@@ -97,36 +33,7 @@ def graph() -> grimp.ImportGraph:
 
 @pytest.fixture(scope="session")
 def bricks() -> SimpleNamespace:
-    return _classify_bricks()
-
-
-# ---------------------------------------------------------------------------
-# Assertion helper
-# ---------------------------------------------------------------------------
-
-
-def assert_only_imports_from(
-    graph: grimp.ImportGraph,
-    sources: set[str],
-    allowed: set[str],
-    all_bricks: set[str],
-    rule: str,
-) -> None:
-    """Fail if any brick in *sources* imports a polyclean brick outside *allowed*."""
-    forbidden = all_bricks - allowed - sources
-
-    violations = [
-        f"  {src} -> {tgt}"
-        for src in sources
-        for tgt in forbidden
-        if graph.direct_import_exists(importer=src, imported=tgt, as_packages=True)
-    ]
-    assert not violations, f"Violated rule '{rule}':\n" + "\n".join(violations)
-
-
-# ---------------------------------------------------------------------------
-# Tests — one per layer, asserts the full allowed-import whitelist
-# ---------------------------------------------------------------------------
+    return classify_bricks()
 
 
 def test_contracts_may_only_import_contract_layer(graph, bricks):
