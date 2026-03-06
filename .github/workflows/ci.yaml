@@ -45,3 +45,23 @@ jobs:
 
       - name: Trunk Code Quality
         uses: trunk-io/trunk-action@v1
+
+  poly-check:
+    name: Poly Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Run poly check
+        run: uv run poly check
