@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 from polyclean.posts_contract import Post
@@ -6,7 +7,7 @@ from polyclean.sqlite_post_adapter import SQLitePostAdapter
 
 
 @pytest.mark.asyncio
-async def test_sqlite_adapter_initialize_and_close(tmp_path):
+async def test_sqlite_adapter_initialize_and_close(tmp_path: Path) -> None:
     db_path = tmp_path / "test_posts.db"
     adapter = SQLitePostAdapter(db_path=str(db_path))
 
@@ -17,7 +18,7 @@ async def test_sqlite_adapter_initialize_and_close(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_sqlite_adapter_save_and_get_by_id(tmp_path):
+async def test_sqlite_adapter_save_and_get_by_id(tmp_path: Path) -> None:
     db_path = tmp_path / "test_posts.db"
     adapter = SQLitePostAdapter(db_path=str(db_path))
     await adapter.initialize()
@@ -45,7 +46,7 @@ async def test_sqlite_adapter_save_and_get_by_id(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_sqlite_adapter_update_posted(tmp_path):
+async def test_sqlite_adapter_update_posted(tmp_path: Path) -> None:
     db_path = tmp_path / "test_posts.db"
     adapter = SQLitePostAdapter(db_path=str(db_path))
     await adapter.initialize()
@@ -73,7 +74,7 @@ async def test_sqlite_adapter_update_posted(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_sqlite_adapter_get_unposted(tmp_path):
+async def test_sqlite_adapter_get_unposted(tmp_path: Path) -> None:
     db_path = tmp_path / "test_posts.db"
     adapter = SQLitePostAdapter(db_path=str(db_path))
     await adapter.initialize()
@@ -106,7 +107,9 @@ async def test_sqlite_adapter_get_unposted(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_sqlite_adapter_no_global_db_file(tmp_path, monkeypatch):
+async def test_sqlite_adapter_no_global_db_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
 
     monkeypatch.chdir(tmp_path)
 

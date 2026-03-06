@@ -1,9 +1,13 @@
+from test.fakes import FakePostStorage
+
 import pytest
 from polyclean.create_post_flow import CreatePostFlow
 
 
 @pytest.mark.asyncio
-async def test_create_post_flow_returns_failure_on_empty_content(fake_post_storage):
+async def test_create_post_flow_returns_failure_on_empty_content(
+    fake_post_storage: FakePostStorage,
+) -> None:
     flow = CreatePostFlow(fake_post_storage)
 
     result = await flow.flow(content="", image_url="https://example.com/img.jpg")
@@ -12,7 +16,9 @@ async def test_create_post_flow_returns_failure_on_empty_content(fake_post_stora
 
 
 @pytest.mark.asyncio
-async def test_create_post_flow_returns_failure_on_empty_image_url(fake_post_storage):
+async def test_create_post_flow_returns_failure_on_empty_image_url(
+    fake_post_storage: FakePostStorage,
+) -> None:
     flow = CreatePostFlow(fake_post_storage)
 
     result = await flow.flow(content="Hello world", image_url="")
@@ -21,7 +27,9 @@ async def test_create_post_flow_returns_failure_on_empty_image_url(fake_post_sto
 
 
 @pytest.mark.asyncio
-async def test_create_post_flow_returns_failure_on_missing_both(fake_post_storage):
+async def test_create_post_flow_returns_failure_on_missing_both(
+    fake_post_storage: FakePostStorage,
+) -> None:
     flow = CreatePostFlow(fake_post_storage)
 
     result = await flow.flow(content="", image_url="")
@@ -30,7 +38,7 @@ async def test_create_post_flow_returns_failure_on_missing_both(fake_post_storag
 
 
 @pytest.mark.asyncio
-async def test_create_post_flow_success(fake_post_storage):
+async def test_create_post_flow_success(fake_post_storage: FakePostStorage) -> None:
     flow = CreatePostFlow(fake_post_storage)
 
     result = await flow.flow(

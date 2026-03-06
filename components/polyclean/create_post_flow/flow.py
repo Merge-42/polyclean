@@ -6,7 +6,7 @@ from polyclean.posts_contract import Post, PostStoragePort
 
 
 class CreatePostFlow:
-    def __init__(self, storage: PostStoragePort):
+    def __init__(self, storage: PostStoragePort) -> None:
         self._storage = storage
 
     async def flow(self, content: str, image_url: str) -> dict:

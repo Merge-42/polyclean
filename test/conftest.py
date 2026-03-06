@@ -4,15 +4,15 @@ import pytest
 
 
 @pytest.fixture
-def fake_post_storage():
+def fake_post_storage() -> FakePostStorage:
     return FakePostStorage()
 
 
 @pytest.fixture
-def fake_instagram_publisher():
+def fake_instagram_publisher() -> FakeInstagramPublisher:
     return FakeInstagramPublisher()
 
 
 @pytest.fixture
-def fake_instagram_publisher_unavailable():
+def fake_instagram_publisher_unavailable() -> FakeInstagramPublisher:
     return FakeInstagramPublisher(connection_valid=False)

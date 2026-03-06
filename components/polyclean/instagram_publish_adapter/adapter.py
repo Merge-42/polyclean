@@ -14,7 +14,7 @@ class InstagramGraphAdapter(InstagramPort):
     Defaults to stub mode unless INSTAGRAM_REAL_API=true.
     """
 
-    def __init__(self, access_token: str, business_account_id: str):
+    def __init__(self, access_token: str, business_account_id: str) -> None:
         self._access_token = access_token
         self._business_account_id = business_account_id
         self._base_url = "https://graph.facebook.com/v18.0"

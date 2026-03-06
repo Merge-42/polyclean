@@ -2,7 +2,7 @@ from polyclean.posts_contract import Post
 
 
 class FakePostStorage:
-    def __init__(self):
+    def __init__(self) -> None:
         self.posts = {}
         self.next_id = 1
 
@@ -11,6 +11,11 @@ class FakePostStorage:
         self.posts[self.next_id] = post
         self.next_id += 1
         return post
+
+    async def save_get_id(self, post: Post) -> int:
+        saved = await self.save(post)
+        assert saved.id is not None
+        return saved.id
 
     async def get_by_id(self, post_id: int) -> Post | None:
         return self.posts.get(post_id)

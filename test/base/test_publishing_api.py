@@ -5,14 +5,14 @@ from polyclean.publishing_api.main import create_app
 
 
 class FakePostStorageWithLifecycle:
-    def __init__(self):
+    def __init__(self) -> None:
         self.posts = {}
         self.next_id = 1
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         pass
 
-    async def close(self):
+    async def close(self) -> None:
         pass
 
     async def save(self, post: Post) -> Post:
@@ -41,14 +41,14 @@ class FakeInstagramPublisher:
 
 
 @pytest.fixture
-def client():
+def client() -> TestClient:
     storage = FakePostStorageWithLifecycle()
     instagram = FakeInstagramPublisher()
     app = create_app(storage, instagram)
     return TestClient(app)
 
 
-def test_create_post_returns_200(client):
+def test_create_post_returns_200(client: TestClient) -> None:
     response = client.post(
         "/posts",
         json={"content": "Hello world", "image_url": "https://example.com/img.jpg"},
@@ -59,13 +59,13 @@ def test_create_post_returns_200(client):
     assert "post_id" in data
 
 
-def test_create_post_returns_400_on_invalid_input(client):
+def test_create_post_returns_400_on_invalid_input(client: TestClient) -> None:
     response = client.post("/posts", json={"content": "", "image_url": ""})
     assert response.status_code == 400
     assert response.json()["detail"] == "Invalid input"
 
 
-def test_publish_post_returns_200_on_success(client):
+def test_publish_post_returns_200_on_success(client: TestClient) -> None:
     create_response = client.post(
         "/posts",
         json={"content": "Hello world", "image_url": "https://example.com/img.jpg"},
@@ -79,13 +79,13 @@ def test_publish_post_returns_200_on_success(client):
     assert data["instagram_post_id"] == "instagram_12345"
 
 
-def test_publish_post_returns_400_on_not_found(client):
+def test_publish_post_returns_400_on_not_found(client: TestClient) -> None:
     response = client.post("/posts/999/publish")
     assert response.status_code == 400
     assert response.json()["detail"] == "Post not found"
 
 
-def test_publish_post_returns_400_on_already_published(client):
+def test_publish_post_returns_400_on_already_published(client: TestClient) -> None:
     create_response = client.post(
         "/posts",
         json={"content": "Hello world", "image_url": "https://example.com/img.jpg"},

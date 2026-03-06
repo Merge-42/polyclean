@@ -1,2 +1,3 @@
 *.pyc
 posts.db
+.coverage

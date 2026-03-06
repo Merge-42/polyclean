@@ -8,7 +8,7 @@ from polyclean.posts_contract import Post, PostStoragePort
 
 
 class SQLitePostAdapter(PostStoragePort):
-    def __init__(self, db_path: str = "posts.db"):
+    def __init__(self, db_path: str = "posts.db") -> None:
         self._db_path = db_path
         self._conn: Optional[aiosqlite.Connection] = None
 

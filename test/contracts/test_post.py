@@ -4,7 +4,7 @@ from polyclean.posts_contract import Post
 
 
 class TestPostEntity:
-    def test_mark_as_posted_sets_posted_true(self):
+    def test_mark_as_posted_sets_posted_true(self) -> None:
         post = Post(
             id=1,
             content="Test post",
@@ -18,7 +18,7 @@ class TestPostEntity:
         assert post.posted is True
         assert post.instagram_post_id == "instagram_12345"
 
-    def test_mark_as_posted_overwrites_existing_id(self):
+    def test_mark_as_posted_overwrites_existing_id(self) -> None:
         post = Post(
             id=1,
             content="Test post",

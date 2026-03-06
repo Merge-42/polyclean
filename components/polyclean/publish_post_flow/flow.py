@@ -5,7 +5,7 @@ from polyclean.posts_contract import PostStoragePort
 
 
 class PublishPostFlow:
-    def __init__(self, storage: PostStoragePort, instagram: InstagramPort):
+    def __init__(self, storage: PostStoragePort, instagram: InstagramPort) -> None:
         self._storage = storage
         self._instagram = instagram
 

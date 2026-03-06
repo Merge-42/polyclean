@@ -15,7 +15,7 @@ lint:
     - mypy
   enabled:
     - actionlint@1.7.8
-    - ty@0.0.20
+    - ty@0.0.21
     - bandit@1.9.4
     - black@26.1.0
     - checkov@3.2.507
@@ -34,6 +34,7 @@ lint:
     - linters: [bandit]
       paths:
         - "**/test_*"
+        - test/fakes/*
 actions:
   enabled:
     - trunk-announce
