@@ -1,5 +1,7 @@
 class FakeInstagramPublisher:
-    def __init__(self, connection_valid: bool = True, post_id: str = "instagram_12345"):
+    def __init__(
+        self, connection_valid: bool = True, post_id: str = "instagram_12345"
+    ) -> None:
         self._connection_valid = connection_valid
         self._post_id = post_id
         self._should_fail = False

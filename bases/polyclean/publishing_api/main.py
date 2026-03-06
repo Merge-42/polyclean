@@ -1,5 +1,6 @@
 import os
 from contextlib import asynccontextmanager
+from typing import AsyncIterator
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,17 +23,21 @@ def create_app(storage: PostStoragePort, instagram: InstagramPort) -> FastAPI:
     publish_post_flow = PublishPostFlow(storage, instagram)
 
     @asynccontextmanager
-    async def lifespan(app: FastAPI):
-        if hasattr(storage, "initialize"):
-            await storage.initialize()
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        # Using getattr + None check to support storage implementations
+        # with optional lifecycle methods (initialize/close)
+        initialize = getattr(storage, "initialize", None)
+        if initialize is not None:
+            await initialize()
         yield
-        if hasattr(storage, "close"):
-            await storage.close()
+        close = getattr(storage, "close", None)
+        if close is not None:
+            await close()
 
     app = FastAPI(title="PolyClean Publishing API", lifespan=lifespan)
 
     app.add_middleware(
-        CORSMiddleware,
+        CORSMiddleware,  # type: ignore[arg-type]
         allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
@@ -40,7 +45,7 @@ def create_app(storage: PostStoragePort, instagram: InstagramPort) -> FastAPI:
     )
 
     @app.post("/posts")
-    async def create_post(req: CreatePostRequest):
+    async def create_post(req: CreatePostRequest) -> dict:
         result = await create_post_flow.flow(
             content=req.content, image_url=req.image_url
         )
@@ -49,7 +54,7 @@ def create_app(storage: PostStoragePort, instagram: InstagramPort) -> FastAPI:
         return result
 
     @app.post("/posts/{post_id}/publish")
-    async def publish_post(post_id: int):
+    async def publish_post(post_id: int) -> dict:
         result = await publish_post_flow.flow(post_id)
         if not result["success"]:
             raise HTTPException(status_code=400, detail=result["message"])

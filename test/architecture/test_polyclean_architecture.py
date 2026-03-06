@@ -25,6 +25,7 @@ from types import SimpleNamespace
 
 import grimp
 import pytest
+from grimp import ImportGraph
 from grimp_assertions import assert_only_imports_from
 from polyclean_bricks import classify_bricks
 
@@ -42,7 +43,9 @@ def bricks() -> SimpleNamespace:
     return classify_bricks()
 
 
-def test_contracts_may_only_import_contract_layer(graph, bricks):
+def test_contracts_may_only_import_contract_layer(
+    graph: ImportGraph, bricks: SimpleNamespace
+) -> None:
     """Contracts are the innermost layer; they depend on nothing outside contracts."""
     assert_only_imports_from(
         graph,
@@ -53,7 +56,9 @@ def test_contracts_may_only_import_contract_layer(graph, bricks):
     )
 
 
-def test_contract_libs_may_only_import_their_own_layer(graph, bricks):
+def test_contract_libs_may_only_import_their_own_layer(
+    graph: ImportGraph, bricks: SimpleNamespace
+) -> None:
     """contract_libs are pure utilities — they should not depend on contracts or any layer type."""
     assert_only_imports_from(
         graph,
@@ -64,7 +69,9 @@ def test_contract_libs_may_only_import_their_own_layer(graph, bricks):
     )
 
 
-def test_flows_may_only_import_contract_and_flow_layer(graph, bricks):
+def test_flows_may_only_import_contract_and_flow_layer(
+    graph: ImportGraph, bricks: SimpleNamespace
+) -> None:
     """Flows orchestrate contracts; they must not reach into adapters or other flows."""
     assert_only_imports_from(
         graph,
@@ -75,7 +82,9 @@ def test_flows_may_only_import_contract_and_flow_layer(graph, bricks):
     )
 
 
-def test_flow_libs_may_only_import_their_own_layer(graph, bricks):
+def test_flow_libs_may_only_import_their_own_layer(
+    graph: ImportGraph, bricks: SimpleNamespace
+) -> None:
     """flow_libs are pure utilities — they should not depend on flows or any layer type."""
     assert_only_imports_from(
         graph,
@@ -86,7 +95,9 @@ def test_flow_libs_may_only_import_their_own_layer(graph, bricks):
     )
 
 
-def test_adapters_may_only_import_contract_and_adapter_layer(graph, bricks):
+def test_adapters_may_only_import_contract_and_adapter_layer(
+    graph: ImportGraph, bricks: SimpleNamespace
+) -> None:
     """Adapters implement ports; they must not reach into flows or other adapters."""
     assert_only_imports_from(
         graph,
@@ -97,7 +108,9 @@ def test_adapters_may_only_import_contract_and_adapter_layer(graph, bricks):
     )
 
 
-def test_adapter_libs_may_only_import_their_own_layer(graph, bricks):
+def test_adapter_libs_may_only_import_their_own_layer(
+    graph: ImportGraph, bricks: SimpleNamespace
+) -> None:
     """adapter_libs are pure utilities — they should not depend on adapters or any layer type."""
     assert_only_imports_from(
         graph,
@@ -108,7 +121,7 @@ def test_adapter_libs_may_only_import_their_own_layer(graph, bricks):
     )
 
 
-def test_bases_may_import_anything(graph, bricks):
+def test_bases_may_import_anything(graph: ImportGraph, bricks: SimpleNamespace) -> None:
     """Bases are the composition root — no import restrictions apply.
 
     This test is intentionally a no-op today. It exists to document the rule
