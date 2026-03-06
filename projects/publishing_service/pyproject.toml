@@ -9,6 +9,7 @@ dependencies = [
   "pydantic",
   "aiosqlite",
   "httpx",
+  "requests",
 ]
 
 [build-system]
@@ -29,3 +30,6 @@ packages = ["polyclean"]
 "../../components/polyclean/publish_post_flow" = "polyclean/publish_post_flow"
 "../../components/polyclean/sqlite_adapter" = "polyclean/sqlite_adapter"
 "../../components/polyclean/instagram_adapter" = "polyclean/instagram_adapter"
+"../../components/polyclean/rest_adapter_lib" = "polyclean/rest_adapter_lib"
+"../../components/polyclean/instagram_publish_adapter" = "polyclean/instagram_publish_adapter"
+"../../components/polyclean/sqlite_post_adapter" = "polyclean/sqlite_post_adapter"
