@@ -35,10 +35,7 @@ theme = "loose"
 "components/polyclean/publish_post_flow" = "polyclean/publish_post_flow"
 "components/polyclean/sqlite_post_adapter" = "polyclean/sqlite_post_adapter"
 "components/polyclean/rest_adapter_lib" = "polyclean/rest_adapter_lib"
-"bases/polyclean/pokemon_card_api" = "polyclean/pokemon_card_api"
-"components/polyclean/sqlite_pokemon_card_adapter" = "polyclean/sqlite_pokemon_card_adapter"
-"components/polyclean/pokemon_card_flow" = "polyclean/pokemon_card_flow"
-"components/polyclean/pokemon_card_contract" = "polyclean/pokemon_card_contract"
+
 [dependency-groups]
 dev = [
   "polylith-cli>=1.0.0",
