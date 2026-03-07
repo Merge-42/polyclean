@@ -203,10 +203,28 @@ PolyClean assumes a standard Python Polylith workspace.
 
 Top-level folders:
 
-- `bases/`
-- `components/`
-- `projects/`
-- `development/`
+- `bases/` - Application entry points (APIs, CLIs)
+- `components/` - Reusable building blocks (business logic, contracts, adapters)
+- `projects/` - Deployable units (service packaging)
+- `development/` - Scratchpad code for exploration
+
+### The Projects Folder
+
+The `projects/` folder contains **deployable units**. Each subdirectory is a separate Python package with its own `pyproject.toml` that defines:
+
+- Service-specific dependencies
+- Which components and bases to include
+- Build and packaging configuration
+
+Projects answer: **"What gets deployed?"**
+
+Components and bases answer: **"What code makes up the service?"**
+
+This separation allows:
+
+- Multiple services from shared code (e.g., REST API + background worker)
+- Independent deployment and versioning per service
+- Service-specific dependency lists
 
 Example `workspace.toml`:
 
@@ -239,7 +257,7 @@ theme = "loose"
 │       ├── sqlite_post_adapter/
 │       └── instagram_publish_adapter/
 ├── projects/
-│   └── publishing_service/
+│   └── publishing_service/      # Deployable service
 └── development/
     └── scratch.py
 ```
