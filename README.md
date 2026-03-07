@@ -38,6 +38,8 @@ polyclean/
 ├── bases/               # Application entry points
 │   └── polyclean/
 │       └── publishing_api/
+├── projects/            # Deployable services
+│   └── publishing_service/
 └── test/                # Tests mirroring component structure
 ```
 

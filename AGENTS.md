@@ -37,6 +37,9 @@ uv run poly create component --name my_feature
 # Create a new base
 uv run poly create base --name my_api
 
+# Create a new project (deployable service)
+uv run poly create project --name my_service
+
 # View workspace info
 uv run poly info
 
@@ -63,6 +66,8 @@ polyclean/
 ├── bases/               # Entry points
 │   └── polyclean/
 │       └── publishing_api/
+├── projects/            # Deployable services
+│   └── publishing_service/
 └── test/                # Tests mirror component structure
     ├── flows/
     ├── adapters/
@@ -71,9 +76,19 @@ polyclean/
     └── fakes/
 ```
 
+**Projects** (in `projects/`) are deployable units - each has its own `pyproject.toml` defining which components/bases to include and service-specific dependencies.
+
 ## Architecture
 
-Clean Architecture layers:
+All Clean Architecture layers are implemented as Polylith components (bricks) in the `components/` folder:
+
+| Clean Architecture | Polylith Component | Naming Suffix |
+| ------------------ | ------------------ | ------------- |
+| Entities           | Contract           | `*_contract`  |
+| Ports              | Contract           | `*_contract`  |
+| Use Cases          | Flow               | `*_flow`      |
+| Adapters           | Adapter            | `*_adapter`   |
+| Layer Utilities    | Library            | `*_lib`       |
 
 - **Entities** - Domain objects (in `*_contract`)
 - **Use Cases** - Business logic (in `*_flow`)
