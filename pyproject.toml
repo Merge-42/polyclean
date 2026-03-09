@@ -17,6 +17,12 @@ dependencies = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.uv.workspace]
+members = ["projects/*"]
+
+[tool.uv]
+managed = true
+
 [tool.hatch.build]
 dev-mode-dirs = ["components", "bases", "development", "."]
 
