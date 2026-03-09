@@ -3,7 +3,13 @@ name = "pokemon-collection-service"
 version = "0.1.0"
 description = "Pokemon TCG Collection Management API Service"
 requires-python = ">=3.12"
-dependencies = ["fastapi", "uvicorn", "pydantic", "aiosqlite"]
+dependencies = [
+  "azure-functions",
+  "fastapi",
+  "uvicorn",
+  "pydantic",
+  "aiosqlite",
+]
 
 [build-system]
 requires = ["hatchling"]
