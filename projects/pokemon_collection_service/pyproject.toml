@@ -1,0 +1,22 @@
+[project]
+name = "pokemon-collection-service"
+version = "0.1.0"
+description = "Pokemon TCG Collection Management API Service"
+requires-python = ">=3.12"
+dependencies = ["fastapi", "uvicorn", "pydantic", "aiosqlite"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.hooks.polylith-bricks]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  "bases/polyclean/pokemon_collection_api",
+  "components/polyclean/pokemon_card_contract",
+  "components/polyclean/add_pokemon_card_flow",
+  "components/polyclean/list_pokemon_cards_flow",
+  "components/polyclean/remove_pokemon_card_flow",
+  "components/polyclean/sqlite_pokemon_adapter",
+]
