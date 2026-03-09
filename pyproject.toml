@@ -42,6 +42,7 @@ theme = "loose"
 "components/polyclean/sqlite_post_adapter" = "polyclean/sqlite_post_adapter"
 "components/polyclean/rest_adapter_lib" = "polyclean/rest_adapter_lib"
 "components/polyclean/pokemon_card_contract" = "polyclean/pokemon_card_contract"
+"components/polyclean/add_pokemon_card_flow" = "polyclean/add_pokemon_card_flow"
 
 [dependency-groups]
 dev = [
