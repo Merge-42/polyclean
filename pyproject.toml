@@ -44,6 +44,7 @@ theme = "loose"
 "components/polyclean/pokemon_card_contract" = "polyclean/pokemon_card_contract"
 "components/polyclean/add_pokemon_card_flow" = "polyclean/add_pokemon_card_flow"
 "components/polyclean/list_pokemon_cards_flow" = "polyclean/list_pokemon_cards_flow"
+"components/polyclean/remove_pokemon_card_flow" = "polyclean/remove_pokemon_card_flow"
 
 [dependency-groups]
 dev = [
