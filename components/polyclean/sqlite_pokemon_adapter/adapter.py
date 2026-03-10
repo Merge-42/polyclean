@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional
 
 import aiosqlite
@@ -8,8 +9,8 @@ from polyclean.pokemon_card_contract import PokemonCard, PokemonCardStoragePort
 
 
 class SQLitePokemonAdapter(PokemonCardStoragePort):
-    def __init__(self, db_path: str = "pokemon_cards.db") -> None:
-        self._db_path = db_path
+    def __init__(self, db_path: Path | str = Path("pokemon_cards.db")) -> None:
+        self._db_path = Path(db_path)
         self._conn: Optional[aiosqlite.Connection] = None
 
     async def initialize(self) -> None:
