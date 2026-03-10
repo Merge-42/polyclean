@@ -1,4 +1,3 @@
-import os
 from contextlib import asynccontextmanager
 from enum import Enum
 from typing import AsyncIterator
@@ -12,6 +11,7 @@ from polyclean.remove_pokemon_card_flow import RemovePokemonCardFlow
 from polyclean.sqlite_pokemon_adapter import SQLitePokemonAdapter
 from pydantic import BaseModel, Field, field_validator
 
+from .config import settings
 from .responses import (
     ApiResponse,
     CardCreatedResponse,
@@ -141,7 +141,6 @@ def create_app(storage: PokemonCardStoragePort) -> FastAPI:
     return app
 
 
-db_path = os.getenv("POKEMON_DB_PATH", "pokemon_cards.db")
-storage = SQLitePokemonAdapter(db_path=db_path)
+storage = SQLitePokemonAdapter(db_path=settings.db_path)
 
 app = create_app(storage)
