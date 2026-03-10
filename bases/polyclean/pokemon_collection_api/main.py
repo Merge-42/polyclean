@@ -2,7 +2,7 @@ import os
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from polyclean.add_pokemon_card_flow import AddPokemonCardFlow
 from polyclean.list_pokemon_cards_flow import ListPokemonCardsFlow
@@ -10,6 +10,14 @@ from polyclean.pokemon_card_contract import PokemonCardStoragePort
 from polyclean.remove_pokemon_card_flow import RemovePokemonCardFlow
 from polyclean.sqlite_pokemon_adapter import SQLitePokemonAdapter
 from pydantic import BaseModel
+
+from .responses import (
+    ApiResponse,
+    CardCreatedResponse,
+    CardListResponse,
+    CardRemovedResponse,
+    PokemonCardResponse,
+)
 
 
 class AddCardRequest(BaseModel):
@@ -48,8 +56,8 @@ def create_app(storage: PokemonCardStoragePort) -> FastAPI:
         allow_headers=["*"],
     )
 
-    @app.post("/cards")
-    async def add_card(req: AddCardRequest) -> dict:
+    @app.post("/cards", response_model=ApiResponse[CardCreatedResponse])
+    async def add_card(req: AddCardRequest) -> ApiResponse[CardCreatedResponse]:
         result = await add_card_flow.flow(
             name=req.name,
             card_type=req.card_type,
@@ -61,20 +69,50 @@ def create_app(storage: PokemonCardStoragePort) -> FastAPI:
             notes=req.notes,
         )
         if not result["success"]:
-            raise HTTPException(status_code=400, detail=result["message"])
-        return result
+            return ApiResponse(
+                success=False,
+                error=result.get("message", "Failed to add card"),
+            )
+        return ApiResponse(
+            success=True,
+            data=CardCreatedResponse(card_id=result["card_id"]),
+        )
 
-    @app.get("/cards")
-    async def list_cards() -> dict:
+    @app.get("/cards", response_model=ApiResponse[CardListResponse])
+    async def list_cards() -> ApiResponse[CardListResponse]:
         result = await list_cards_flow.flow()
-        return result
+        cards = [
+            PokemonCardResponse(
+                id=card["id"],
+                name=card["name"],
+                card_type=card["card_type"],
+                hp=card["hp"],
+                set_name=card["set_name"],
+                set_number=card["set_number"],
+                rarity=card["rarity"],
+                condition=card["condition"],
+                acquired_at=card["acquired_at"],
+                notes=card.get("notes"),
+            )
+            for card in result.get("cards", [])
+        ]
+        return ApiResponse(
+            success=True,
+            data=CardListResponse(cards=cards, count=len(cards)),
+        )
 
-    @app.delete("/cards/{card_id}")
-    async def remove_card(card_id: int) -> dict:
+    @app.delete("/cards/{card_id}", response_model=ApiResponse[CardRemovedResponse])
+    async def remove_card(card_id: int) -> ApiResponse[CardRemovedResponse]:
         result = await remove_card_flow.flow(card_id)
         if not result["success"]:
-            raise HTTPException(status_code=404, detail=result["message"])
-        return result
+            return ApiResponse(
+                success=False,
+                error=result.get("message", "Card not found"),
+            )
+        return ApiResponse(
+            success=True,
+            data=CardRemovedResponse(removed=True, card_id=card_id),
+        )
 
     return app
 

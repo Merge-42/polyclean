@@ -62,16 +62,16 @@ def test_full_crud_flow(client: TestClient) -> None:
     assert add_response.status_code == 200
     add_data = add_response.json()
     assert add_data["success"] is True
-    card_id = add_data["card_id"]
+    card_id = add_data["data"]["card_id"]
 
     # Step 2: Verify card is in list
     list_response = client.get("/cards")
     assert list_response.status_code == 200
     list_data = list_response.json()
     assert list_data["success"] is True
-    assert len(list_data["cards"]) == 1
-    assert list_data["cards"][0]["name"] == "Charizard"
-    assert list_data["cards"][0]["card_type"] == "Fire"
+    assert len(list_data["data"]["cards"]) == 1
+    assert list_data["data"]["cards"][0]["name"] == "Charizard"
+    assert list_data["data"]["cards"][0]["card_type"] == "Fire"
 
     # Step 3: Remove the card
     delete_response = client.delete(f"/cards/{card_id}")
@@ -84,4 +84,4 @@ def test_full_crud_flow(client: TestClient) -> None:
     assert list_response_after.status_code == 200
     list_data_after = list_response_after.json()
     assert list_data_after["success"] is True
-    assert len(list_data_after["cards"]) == 0
+    assert len(list_data_after["data"]["cards"]) == 0
