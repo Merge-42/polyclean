@@ -1,6 +1,44 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "azure-functions-core-tools@latest": {
+      "last_modified": "2026-02-23T15:40:43Z",
+      "resolved": "github:NixOS/nixpkgs/80d901ec0377e19ac3f7bb8c035201e2e098cc97#azure-functions-core-tools",
+      "source": "devbox-search",
+      "version": "4.0.7030",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qylhwrx8s64csr6j6lykhm8f4017pfln-azure-functions-core-tools-4.0.7030",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/qylhwrx8s64csr6j6lykhm8f4017pfln-azure-functions-core-tools-4.0.7030"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/g7vlqxrd6ydvl35sa7bldfv4cwyq55y4-azure-functions-core-tools-4.0.7030",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/g7vlqxrd6ydvl35sa7bldfv4cwyq55y4-azure-functions-core-tools-4.0.7030"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/jdbh0h12xyl5f9fkv0gdwvyshjygq1nc-azure-functions-core-tools-4.0.7030",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/jdbh0h12xyl5f9fkv0gdwvyshjygq1nc-azure-functions-core-tools-4.0.7030"
+        }
+      }
+    },
     "gh@latest": {
       "last_modified": "2026-02-26T05:06:13Z",
       "resolved": "github:NixOS/nixpkgs/26eaeac4e409d7b5a6bf6f90a2a2dc223c78d915#gh",
