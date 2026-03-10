@@ -1,5 +1,6 @@
 import os
 from contextlib import asynccontextmanager
+from enum import Enum
 from typing import AsyncIterator
 
 from fastapi import FastAPI
@@ -9,7 +10,7 @@ from polyclean.list_pokemon_cards_flow import ListPokemonCardsFlow
 from polyclean.pokemon_card_contract import PokemonCardStoragePort
 from polyclean.remove_pokemon_card_flow import RemovePokemonCardFlow
 from polyclean.sqlite_pokemon_adapter import SQLitePokemonAdapter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from .responses import (
     ApiResponse,
@@ -20,15 +21,38 @@ from .responses import (
 )
 
 
+class Condition(str, Enum):
+    MINT = "mint"
+    NEAR_MINT = "near_mint"
+    EXCELLENT = "excellent"
+    GOOD = "good"
+    FAIR = "fair"
+    POOR = "poor"
+
+
 class AddCardRequest(BaseModel):
-    name: str
-    card_type: str
-    hp: int
-    set_name: str
-    set_number: int
-    rarity: str
-    condition: str
-    notes: str | None = None
+    name: str = Field(
+        ..., min_length=1, max_length=100, description="Pokemon card name"
+    )
+    card_type: str = Field(
+        ..., min_length=1, description="Card type (e.g., Fire, Water)"
+    )
+    hp: int = Field(..., ge=0, le=1000, description="Hit points")
+    set_name: str = Field(..., min_length=1, description="Set name (e.g., Base Set)")
+    set_number: int = Field(..., ge=1, le=1000, description="Card number in set")
+    rarity: str = Field(..., min_length=1, description="Rarity (e.g., Rare Holo)")
+    condition: Condition = Field(..., description="Card condition")
+    notes: str | None = Field(
+        default=None, max_length=1000, description="Optional notes"
+    )
+
+    @field_validator("name")
+    @classmethod
+    def name_must_be_valid(cls, v: str) -> str:
+        if not v or v.strip() == "":
+            raise ValueError("Name cannot be empty or whitespace")
+        # Normalize to title case for consistency
+        return v.strip().title()
 
 
 def create_app(storage: PokemonCardStoragePort) -> FastAPI:
@@ -65,7 +89,7 @@ def create_app(storage: PokemonCardStoragePort) -> FastAPI:
             set_name=req.set_name,
             set_number=req.set_number,
             rarity=req.rarity,
-            condition=req.condition,
+            condition=req.condition.value,
             notes=req.notes,
         )
         if not result["success"]:
