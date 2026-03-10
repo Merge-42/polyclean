@@ -9,6 +9,7 @@ dependencies = [
   "uvicorn",
   "pydantic",
   "pydantic-settings",
+  "loguru",
   "aiosqlite",
 ]
 

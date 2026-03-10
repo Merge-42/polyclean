@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,10 +13,19 @@ class AppSettings(BaseSettings):
         extra="ignore",
     )
 
-    db_path: str = "pokemon_cards.db"
+    # Database settings
+    db_path: Path = Path("pokemon_cards.db")
     db_echo: bool = False
+
+    # API settings
     api_title: str = "Pokemon Collection API"
     api_version: str = "1.0.0"
+
+    # Logging settings
+    log_level: str = "INFO"
+    log_file: Path | None = (
+        None  # Set to path like "logs/app.log" to enable file logging
+    )
 
 
 # Singleton instance

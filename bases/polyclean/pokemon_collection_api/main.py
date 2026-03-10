@@ -4,6 +4,7 @@ from typing import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
 from polyclean.add_pokemon_card_flow import AddPokemonCardFlow
 from polyclean.list_pokemon_cards_flow import ListPokemonCardsFlow
 from polyclean.pokemon_card_contract import PokemonCardStoragePort
@@ -12,6 +13,7 @@ from polyclean.sqlite_pokemon_adapter import SQLitePokemonAdapter
 from pydantic import BaseModel, Field, field_validator
 
 from .config import settings
+from .logging_ import setup_logging
 from .responses import (
     ApiResponse,
     CardCreatedResponse,
@@ -62,13 +64,26 @@ def create_app(storage: PokemonCardStoragePort) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        # Configure logging on startup
+        log_level = settings.log_level.upper() if settings.log_level else "INFO"
+        if settings.db_echo:
+            log_level = "DEBUG"
+        setup_logging(log_level=log_level, log_file=settings.log_file)
+        logger.info(f"Starting {settings.api_title} v{settings.api_version}")
+
         initialize = getattr(storage, "initialize", None)
         if initialize is not None:
             await initialize()
+            logger.info("Database initialized")
+
         yield
+
         close = getattr(storage, "close", None)
         if close is not None:
             await close()
+            logger.info("Database connection closed")
+
+        logger.info("Application shutdown complete")
 
     app = FastAPI(title="Pokemon Collection API", lifespan=lifespan)
 
@@ -82,6 +97,7 @@ def create_app(storage: PokemonCardStoragePort) -> FastAPI:
 
     @app.post("/cards", response_model=ApiResponse[CardCreatedResponse])
     async def add_card(req: AddCardRequest) -> ApiResponse[CardCreatedResponse]:
+        logger.debug(f"Adding card: {req.name}")
         result = await add_card_flow.flow(
             name=req.name,
             card_type=req.card_type,
@@ -93,10 +109,12 @@ def create_app(storage: PokemonCardStoragePort) -> FastAPI:
             notes=req.notes,
         )
         if not result["success"]:
+            logger.warning(f"Failed to add card: {result.get('message')}")
             return ApiResponse(
                 success=False,
                 error=result.get("message", "Failed to add card"),
             )
+        logger.info(f"Card added successfully: {req.name} (ID: {result['card_id']})")
         return ApiResponse(
             success=True,
             data=CardCreatedResponse(card_id=result["card_id"]),
@@ -127,12 +145,15 @@ def create_app(storage: PokemonCardStoragePort) -> FastAPI:
 
     @app.delete("/cards/{card_id}", response_model=ApiResponse[CardRemovedResponse])
     async def remove_card(card_id: int) -> ApiResponse[CardRemovedResponse]:
+        logger.debug(f"Removing card ID: {card_id}")
         result = await remove_card_flow.flow(card_id)
         if not result["success"]:
+            logger.warning(f"Failed to remove card {card_id}: {result.get('message')}")
             return ApiResponse(
                 success=False,
                 error=result.get("message", "Card not found"),
             )
+        logger.info(f"Card removed successfully: ID {card_id}")
         return ApiResponse(
             success=True,
             data=CardRemovedResponse(removed=True, card_id=card_id),
