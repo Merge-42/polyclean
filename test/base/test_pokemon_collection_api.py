@@ -45,7 +45,37 @@ def client() -> TestClient:
     return TestClient(app)
 
 
+@pytest.fixture
+def client_with_cards() -> TestClient:
+    """Client pre-populated with 3 cards."""
+    storage = FakePokemonStorageWithLifecycle()
+    app = create_app(storage)
+    client = TestClient(app)
+
+    # Add 3 cards
+    for i, name in enumerate(["Charizard", "Blastoise", "Venusaur"]):
+        client.post(
+            "/cards",
+            json={
+                "name": name,
+                "card_type": "Fire" if i == 0 else "Water" if i == 1 else "Grass",
+                "hp": 120 + i * 10,
+                "set_name": "Base Set",
+                "set_number": i + 1,
+                "rarity": "Rare Holo",
+                "condition": "mint",
+            },
+        )
+    return client
+
+
+# =============================================================================
+# Integration Tests
+# =============================================================================
+
+
 def test_full_crud_flow(client: TestClient) -> None:
+    """Test complete CRUD workflow."""
     # Step 1: Add a card
     add_response = client.post(
         "/cards",
@@ -85,3 +115,174 @@ def test_full_crud_flow(client: TestClient) -> None:
     list_data_after = list_response_after.json()
     assert list_data_after["success"] is True
     assert len(list_data_after["data"]["cards"]) == 0
+
+
+def test_empty_collection_returns_empty_list(client: TestClient) -> None:
+    """GET on empty collection returns success with empty cards array."""
+    response = client.get("/cards")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["data"]["cards"] == []
+    assert data["data"]["count"] == 0
+
+
+def test_multiple_cards_list(client_with_cards: TestClient) -> None:
+    """GET returns all cards with correct count."""
+    response = client_with_cards.get("/cards")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert len(data["data"]["cards"]) == 3
+    assert data["data"]["count"] == 3
+
+
+def test_invalid_route_returns_404(client: TestClient) -> None:
+    """Invalid route returns 404."""
+    response = client.get("/nonexistent")
+    assert response.status_code == 404
+
+
+def test_get_single_card_not_found(client: TestClient) -> None:
+    """GET single card returns 405 if endpoint doesn't exist."""
+    # Note: There's no GET /cards/{id} endpoint, so it returns 405
+    response = client.get("/cards/99999")
+    # 405 = Method Not Allowed (endpoint doesn't exist)
+    assert response.status_code == 405
+
+
+# =============================================================================
+# Error Case Tests
+# =============================================================================
+
+
+def test_add_card_invalid_condition(client: TestClient) -> None:
+    """Adding card with invalid condition returns 422."""
+    response = client.post(
+        "/cards",
+        json={
+            "name": "Charizard",
+            "card_type": "Fire",
+            "hp": 120,
+            "set_name": "Base Set",
+            "set_number": 4,
+            "rarity": "Rare Holo",
+            "condition": "invalid_condition",
+        },
+    )
+    assert response.status_code == 422
+    data = response.json()
+    assert "detail" in data
+
+
+def test_add_card_negative_hp(client: TestClient) -> None:
+    """Adding card with negative HP returns 422."""
+    response = client.post(
+        "/cards",
+        json={
+            "name": "Charizard",
+            "card_type": "Fire",
+            "hp": -10,
+            "set_name": "Base Set",
+            "set_number": 4,
+            "rarity": "Rare Holo",
+            "condition": "mint",
+        },
+    )
+    assert response.status_code == 422
+    data = response.json()
+    assert "detail" in data
+
+
+def test_add_card_empty_name(client: TestClient) -> None:
+    """Adding card with empty name returns 422."""
+    response = client.post(
+        "/cards",
+        json={
+            "name": "",
+            "card_type": "Fire",
+            "hp": 120,
+            "set_name": "Base Set",
+            "set_number": 4,
+            "rarity": "Rare Holo",
+            "condition": "mint",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_add_card_missing_required_field(client: TestClient) -> None:
+    """Adding card with missing required field returns 422."""
+    response = client.post(
+        "/cards",
+        json={
+            "name": "Charizard",
+            "card_type": "Fire",
+            # Missing: hp, set_name, set_number, rarity, condition
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_remove_nonexistent_card(client: TestClient) -> None:
+    """Removing non-existent card returns success: false."""
+    response = client.delete("/cards/99999")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is False
+    assert data["error"] is not None
+
+
+def test_add_card_hp_exceeds_max(client: TestClient) -> None:
+    """Adding card with HP > 1000 returns 422."""
+    response = client.post(
+        "/cards",
+        json={
+            "name": "Charizard",
+            "card_type": "Fire",
+            "hp": 1001,
+            "set_name": "Base Set",
+            "set_number": 4,
+            "rarity": "Rare Holo",
+            "condition": "mint",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_add_card_set_number_zero(client: TestClient) -> None:
+    """Adding card with set_number < 1 returns 422."""
+    response = client.post(
+        "/cards",
+        json={
+            "name": "Charizard",
+            "card_type": "Fire",
+            "hp": 120,
+            "set_name": "Base Set",
+            "set_number": 0,
+            "rarity": "Rare Holo",
+            "condition": "mint",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_add_card_notes_too_long(client: TestClient) -> None:
+    """Adding card with notes > 1000 chars returns 422."""
+    response = client.post(
+        "/cards",
+        json={
+            "name": "Charizard",
+            "card_type": "Fire",
+            "hp": 120,
+            "set_name": "Base Set",
+            "set_number": 4,
+            "rarity": "Rare Holo",
+            "condition": "mint",
+            "notes": "x" * 1001,
+        },
+    )
+    assert response.status_code == 422
