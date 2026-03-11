@@ -2,7 +2,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 from typing import Optional
+
+
+class CardCondition(str, Enum):
+    MINT = "mint"
+    NEAR_MINT = "near_mint"
+    EXCELLENT = "excellent"
+    GOOD = "good"
+    FAIR = "fair"
+    POOR = "poor"
 
 
 @dataclass
@@ -23,13 +33,8 @@ class PokemonCard:
             return False
         if self.hp < 0:
             return False
-        if self.condition not in [
-            "mint",
-            "near_mint",
-            "excellent",
-            "good",
-            "fair",
-            "poor",
-        ]:
+        try:
+            CardCondition(self.condition)
+        except ValueError:
             return False
         return True

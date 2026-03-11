@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-from enum import Enum
 from typing import AsyncIterator
 
 from fastapi import FastAPI
@@ -7,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from polyclean.add_pokemon_card_flow import AddPokemonCardFlow
 from polyclean.list_pokemon_cards_flow import ListPokemonCardsFlow
-from polyclean.pokemon_card_contract import PokemonCardStoragePort
+from polyclean.pokemon_card_contract import CardCondition, PokemonCardStoragePort
 from polyclean.remove_pokemon_card_flow import RemovePokemonCardFlow
 from polyclean.sqlite_pokemon_adapter import SQLitePokemonAdapter
 from pydantic import BaseModel, Field, field_validator
@@ -23,15 +22,6 @@ from .responses import (
 )
 
 
-class Condition(str, Enum):
-    MINT = "mint"
-    NEAR_MINT = "near_mint"
-    EXCELLENT = "excellent"
-    GOOD = "good"
-    FAIR = "fair"
-    POOR = "poor"
-
-
 class AddCardRequest(BaseModel):
     name: str = Field(
         ..., min_length=1, max_length=100, description="Pokemon card name"
@@ -43,7 +33,7 @@ class AddCardRequest(BaseModel):
     set_name: str = Field(..., min_length=1, description="Set name (e.g., Base Set)")
     set_number: int = Field(..., ge=1, le=1000, description="Card number in set")
     rarity: str = Field(..., min_length=1, description="Rarity (e.g., Rare Holo)")
-    condition: Condition = Field(..., description="Card condition")
+    condition: CardCondition = Field(..., description="Card condition")
     notes: str | None = Field(
         default=None, max_length=1000, description="Optional notes"
     )

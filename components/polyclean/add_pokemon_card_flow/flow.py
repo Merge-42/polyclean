@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from polyclean.pokemon_card_contract import PokemonCard, PokemonCardStoragePort
+from polyclean.pokemon_card_contract import (
+    CardCondition,
+    PokemonCard,
+    PokemonCardStoragePort,
+)
 
 
 class AddPokemonCardFlow:
@@ -23,8 +27,10 @@ class AddPokemonCardFlow:
         if not name or not card_type or hp < 0:
             return {"success": False, "message": "Invalid input"}
 
-        valid_conditions = ["mint", "near_mint", "excellent", "good", "fair", "poor"]
-        if condition not in valid_conditions:
+        valid_conditions = [c.value for c in CardCondition]
+        try:
+            CardCondition(condition)
+        except ValueError:
             return {
                 "success": False,
                 "message": f"Invalid condition. Must be one of: {valid_conditions}",
