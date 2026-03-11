@@ -52,4 +52,5 @@ dev = [
   "grimp>=3.0.0",
   "types-requests>=2.31.0",
   "ty>=0.0.21",
+  "pyclean>=3.5.0",
 ]
