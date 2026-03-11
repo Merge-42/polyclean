@@ -8,9 +8,12 @@ dependencies = [
   "fastapi>=0.110",
   "uvicorn[standard]>=0.27",
   "pydantic>=2.6",
+  "pydantic-settings>=2.1",
+  "loguru>=0.7",
   "aiosqlite>=0.19",
   "httpx>=0.27",
   "requests>=2.31",
+  "azure-functions>=1.21",
 ]
 
 [build-system]
@@ -41,6 +44,13 @@ theme = "loose"
 "components/polyclean/publish_post_flow" = "polyclean/publish_post_flow"
 "components/polyclean/sqlite_post_adapter" = "polyclean/sqlite_post_adapter"
 "components/polyclean/rest_adapter_lib" = "polyclean/rest_adapter_lib"
+"bases/polyclean/pokemon_collection_api" = "polyclean/pokemon_collection_api"
+"components/polyclean/pokemon_card_contract" = "polyclean/pokemon_card_contract"
+"components/polyclean/add_pokemon_card_flow" = "polyclean/add_pokemon_card_flow"
+"components/polyclean/list_pokemon_cards_flow" = "polyclean/list_pokemon_cards_flow"
+"components/polyclean/remove_pokemon_card_flow" = "polyclean/remove_pokemon_card_flow"
+"components/polyclean/sqlite_pokemon_adapter" = "polyclean/sqlite_pokemon_adapter"
+"projects/pokemon_collection_service" = "pokemon_collection_service"
 
 [dependency-groups]
 dev = [

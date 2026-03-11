@@ -1,6 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.2/.schema/devbox.schema.json",
-  "packages": ["uv@latest", "gh@latest"],
+  "packages": [
+    "uv@latest",
+    "gh@latest",
+    "jq@latest",
+    "azure-functions-core-tools@latest"
+  ],
   "shell": {
     "init_hook": ["echo 'Welcome to devbox!' > /dev/null"],
     "scripts": {

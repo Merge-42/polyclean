@@ -1,4 +1,4 @@
-from test.fakes import FakeInstagramPublisher, FakePostStorage
+from test.fakes import FakeInstagramPublisher, FakePokemonStorage, FakePostStorage
 
 import pytest
 
@@ -6,6 +6,11 @@ import pytest
 @pytest.fixture
 def fake_post_storage() -> FakePostStorage:
     return FakePostStorage()
+
+
+@pytest.fixture
+def fake_pokemon_storage() -> FakePokemonStorage:
+    return FakePokemonStorage()
 
 
 @pytest.fixture
